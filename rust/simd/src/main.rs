@@ -6,7 +6,7 @@ use std::io::Read;
 use std::time::Instant;
 
 #[inline(always)]
-unsafe fn movemask_epi8(input: uint8x16_t) -> u64 {
+unsafe fn _mm_movemask_epi8_neon(input: uint8x16_t) -> u64 {
     const XR: [i8; 8] = [-7, -6, -5, -4, -3, -2, -1, 0];
     let mask_and: aarch64::uint8x8_t = aarch64::vdup_n_u8(0x80);
     let mask_shift = aarch64::vld1_s8(XR.as_ptr());
@@ -42,7 +42,7 @@ unsafe fn simd_count(input: &[u8], ch: u8) -> usize {
     for _input in input.chunks(16) {
         let chunk: uint8x16_t = *(_input.as_ptr() as *mut uint8x16_t);
         let results: uint8x16_t = aarch64::vceqq_u8(chunk, tocmp);
-        total += movemask_epi8(results).count_ones() as usize;
+        total += _mm_movemask_epi8_neon(results).count_ones() as usize;
     }
     return total;
 }
